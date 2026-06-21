@@ -31,6 +31,10 @@ let gpsIoTMonitor = null;  // Active monitor instance
 app.use(cors());
 app.use(express.json());
 
+// Serve frontend static files
+const distDir = path.join(__dirname, '../dist');
+app.use(express.static(distDir));
+
 const DATA_DIR = path.join(__dirname, '../src/data');
 
 // SOC to Cell Voltage (mV) mapping from user photo
@@ -1414,6 +1418,11 @@ app.post('/api/gpsiot/predict-from-asset', express.json(), (req, res) => {
   }
 });
 
+// SPA Fallback: Serve index.html for any non-API routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(distDir, 'index.html'));
+});
+
 app.listen(PORT, () => {
   console.log(`\n🔋 SoH Prediction API Server (GPS IoT Only)`);
   console.log(`   Running at http://localhost:${PORT}\n`);
@@ -1437,12 +1446,12 @@ app.listen(PORT, () => {
 
   // Require GPS IoT credentials
   if (!GPS_IOT_API_KEY || !GPS_IOT_API_SECRET) {
-    console.error('⚠️  GPS IoT credentials missing!');
-    console.error('   Required environment variables:');
-    console.error('   - GPSIOT_API_KEY');
-    console.error('   - GPSIOT_API_SECRET\n');
-    console.error('   Set these in .env file and restart.\n');
-    return;
+    console.warn('⚠️  GPS IoT credentials not set!');
+    console.warn('   Optional environment variables:');
+    console.warn('   - GPSIOT_API_KEY');
+    console.warn('   - GPSIOT_API_SECRET\n');
+    console.warn('   GPS IoT features disabled until credentials added.\n');
+    return; // Return from the listen callback, NOT from the entire app
   }
 
   // Auto-start GPS IoT monitoring
