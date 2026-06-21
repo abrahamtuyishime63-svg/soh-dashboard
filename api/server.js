@@ -16,7 +16,7 @@ require('dotenv').config();
 const gpsIoT = require('./gpsiot-client');
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 // GPS IoT Configuration - REQUIRED
 const GPS_IOT_API_KEY = process.env.GPSIOT_API_KEY;
