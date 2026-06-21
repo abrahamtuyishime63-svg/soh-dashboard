@@ -226,7 +226,7 @@ app.get('/api/predictions', async (req, res) => {
           predictions.push(pred);
         }
       }
-      return res.json({ ok: true, demoMode: true, count: predictions.length, data: predictions });
+      return res.json({ ok: true, count: predictions.length, data: predictions });
     }
 
     if (!gpsIoTMonitor) {
@@ -275,13 +275,11 @@ app.get('/api/batteries', (req, res) => {
       const batteries = DEMO_ASSETS.map(a => ({
         id: a.assetId,
         name: a.assetId,
-        make: a.make,
-        model: a.model,
-        year: a.year,
-        status: 'Active (Demo Data)',
-        demoMode: true
+        client: 'Demo Fleet',
+        reseller: 'Demo Mode',
+        imei: '000-' + a.assetId
       }));
-      return res.json({ ok: true, batteries, demoMode: true });
+      return res.json({ ok: true, batteries });
     }
 
     if (!gpsIoTMonitor) {
@@ -1292,14 +1290,12 @@ app.get('/api/gpsiot/assets', (req, res) => {
       return res.json({
         ok: true,
         count: DEMO_ASSETS.length,
-        demoMode: true,
         assets: DEMO_ASSETS.map(a => ({
           id: a.assetId,
           name: a.assetId,
-          make: a.make,
-          model: a.model,
-          year: a.year,
-          status: 'Active (Demo)'
+          imei: '000-' + a.assetId,
+          client: 'Demo Fleet',
+          reseller: 'Demo Mode'
         }))
       });
     }
@@ -1342,19 +1338,17 @@ app.get('/api/gpsiot/readings', (req, res) => {
     if (DEMO_MODE) {
       return res.json({
         ok: true,
-        demoMode: true,
         count: DEMO_ASSETS.length,
         timestamp: new Date().toISOString(),
         readings: DEMO_ASSETS.map(asset => ({
           asset: {
             id: asset.assetId,
             name: asset.assetId,
-            make: asset.make,
-            model: asset.model
+            client: 'Demo Fleet'
           },
           latestReading: generateDemoReading(asset.assetId),
           recordCount: 1,
-          status: 'Active (Demo)'
+          startedAt: new Date().toISOString()
         }))
       });
     }
