@@ -27,7 +27,7 @@ const GPS_IOT_POLL_INTERVAL = parseInt(process.env.GPSIOT_POLL_INTERVAL || '5000
 const GPS_IOT_ENABLED = true;
 
 let gpsIoTMonitor = null;  // Active monitor instance
-let DEMO_MODE = !GPS_IOT_API_KEY || !GPS_IOT_API_SECRET;  // Auto-enable demo if no credentials
+let DEMO_MODE = false;  // Disabled by default - enable with credentials
 
 // Demo data generator for testing without real GPS IoT credentials
 const DEMO_ASSETS = [
@@ -404,6 +404,45 @@ app.get('/api/stream', (req, res) => {
 // ─── Health check ──────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, uptime: process.uptime(), timestamp: new Date().toISOString() });
+});
+
+// ─── Demo Mode Endpoints (for testing without credentials) ──────────────────────
+app.get('/api/demo/batteries', (req, res) => {
+  const batteries = DEMO_ASSETS.map(a => ({
+    id: a.assetId,
+    name: a.assetId,
+    client: 'Demo Fleet',
+    reseller: 'Demo Mode',
+    imei: '000-' + a.assetId
+  }));
+  res.json({ ok: true, demoMode: true, batteries });
+});
+
+app.get('/api/demo/readings', (req, res) => {
+  res.json({
+    ok: true,
+    demoMode: true,
+    count: DEMO_ASSETS.length,
+    timestamp: new Date().toISOString(),
+    readings: DEMO_ASSETS.map(asset => ({
+      asset: {
+        id: asset.assetId,
+        name: asset.assetId,
+        client: 'Demo Fleet'
+      },
+      latestReading: generateDemoReading(asset.assetId),
+      recordCount: 1,
+      startedAt: new Date().toISOString()
+    }))
+  });
+});
+
+app.get('/api/demo/predictions', (req, res) => {
+  const predictions = DEMO_ASSETS.map(asset => {
+    const reading = generateDemoReading(asset.assetId);
+    return generatePredictionFromReading(reading, asset.assetId);
+  });
+  res.json({ ok: true, demoMode: true, count: predictions.length, data: predictions });
 });
 
 // POST /api/predict — Production-grade single-state prediction
