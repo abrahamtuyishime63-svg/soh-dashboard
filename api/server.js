@@ -201,40 +201,15 @@ function normalizeCloudPayload(body, rowIndex = 0) {
 // GET /api/predictions — Get SoH predictions from all GPS IoT assets
 app.get('/api/predictions', async (req, res) => {
   try {
-    const assetId = req.query.battery;
-    const predictions = [];
-
-    // Return demo predictions if in demo mode
-    if (DEMO_MODE) {
-      if (assetId) {
-        // Get prediction for specific asset in demo mode
-        const asset = DEMO_ASSETS.find(a => a.assetId === assetId);
-        if (!asset) {
-          return res.status(404).json({
-            ok: false,
-            error: `Asset ${assetId} not found`
-          });
-        }
-        const reading = generateDemoReading(assetId);
-        const pred = generatePredictionFromReading(reading, assetId);
-        predictions.push(pred);
-      } else {
-        // Get predictions for all demo assets
-        for (const asset of DEMO_ASSETS) {
-          const reading = generateDemoReading(asset.assetId);
-          const pred = generatePredictionFromReading(reading, asset.assetId);
-          predictions.push(pred);
-        }
-      }
-      return res.json({ ok: true, count: predictions.length, data: predictions });
-    }
-
     if (!gpsIoTMonitor) {
       return res.status(503).json({
         ok: false,
-        error: 'GPS IoT monitoring not active'
+        error: 'GPS IoT not configured. Use demo endpoint: /api/demo/predictions'
       });
     }
+
+    const assetId = req.query.battery;
+    const predictions = [];
 
     if (assetId) {
       // Get prediction for specific asset
@@ -270,22 +245,10 @@ app.get('/api/predictions', async (req, res) => {
 // GET /api/batteries — Returns GPS IoT monitored assets as "batteries"
 app.get('/api/batteries', (req, res) => {
   try {
-    // Return demo batteries if in demo mode
-    if (DEMO_MODE) {
-      const batteries = DEMO_ASSETS.map(a => ({
-        id: a.assetId,
-        name: a.assetId,
-        client: 'Demo Fleet',
-        reseller: 'Demo Mode',
-        imei: '000-' + a.assetId
-      }));
-      return res.json({ ok: true, batteries });
-    }
-
     if (!gpsIoTMonitor) {
       return res.status(503).json({
         ok: false,
-        error: 'GPS IoT monitoring not active. Start with POST /api/gpsiot/start'
+        error: 'GPS IoT not configured. Use demo endpoints: /api/demo/batteries, /api/demo/readings, /api/demo/predictions'
       });
     }
 
@@ -1324,21 +1287,6 @@ app.post('/api/gpsiot/stop', (req, res) => {
  */
 app.get('/api/gpsiot/assets', (req, res) => {
   try {
-    // Return demo assets if in demo mode
-    if (DEMO_MODE) {
-      return res.json({
-        ok: true,
-        count: DEMO_ASSETS.length,
-        assets: DEMO_ASSETS.map(a => ({
-          id: a.assetId,
-          name: a.assetId,
-          imei: '000-' + a.assetId,
-          client: 'Demo Fleet',
-          reseller: 'Demo Mode'
-        }))
-      });
-    }
-
     if (!gpsIoTMonitor) {
       return res.json({
         ok: true,
@@ -1373,25 +1321,6 @@ app.get('/api/gpsiot/assets', (req, res) => {
  */
 app.get('/api/gpsiot/readings', (req, res) => {
   try {
-    // Return demo readings if in demo mode
-    if (DEMO_MODE) {
-      return res.json({
-        ok: true,
-        count: DEMO_ASSETS.length,
-        timestamp: new Date().toISOString(),
-        readings: DEMO_ASSETS.map(asset => ({
-          asset: {
-            id: asset.assetId,
-            name: asset.assetId,
-            client: 'Demo Fleet'
-          },
-          latestReading: generateDemoReading(asset.assetId),
-          recordCount: 1,
-          startedAt: new Date().toISOString()
-        }))
-      });
-    }
-
     if (!gpsIoTMonitor) {
       return res.json({
         ok: true,
