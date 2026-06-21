@@ -1418,9 +1418,14 @@ app.post('/api/gpsiot/predict-from-asset', express.json(), (req, res) => {
   }
 });
 
-// SPA Fallback: Serve index.html for any non-API routes
+// SPA Fallback: Serve index.html for any non-API routes (MUST be before app.listen)
 app.get('*', (req, res) => {
-  res.sendFile(path.join(distDir, 'index.html'));
+  const indexPath = path.join(distDir, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(404).json({ error: 'Frontend not found' });
+  }
 });
 
 app.listen(PORT, () => {
