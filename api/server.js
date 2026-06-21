@@ -140,7 +140,10 @@ function generatePredictionFromReading(reading, assetId) {
     vehicle_speed: vehicleSpeed,
     soh_actual: ensemble_soh,
     ensemble_soh,
-    predictions,
+    // Flatten predictions to top level for React component compatibility
+    ...predictions,
+    // Keep nested predictions for reference
+    predictions_obj: predictions,
     alert: ensemble_soh < 0.8 ? 'CRITICAL' : ensemble_soh < 0.85 ? 'WARNING' : 'HEALTHY'
   };
 }
