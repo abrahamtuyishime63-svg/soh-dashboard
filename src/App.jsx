@@ -46,9 +46,11 @@ export default function App() {
     fetch('/api/batteries')
       .then(r => r.json())
       .then(d => {
-        if (d.ok) {
-          setBatteries(d.batteries)
-          setSelectedBattery(d.batteries[0] || '')
+        if (d.ok && d.batteries) {
+          // Extract just the battery IDs/names for the dropdown
+          const batteryNames = d.batteries.map(b => b.id || b.name)
+          setBatteries(batteryNames)
+          setSelectedBattery(batteryNames[0] || '')
         }
       })
       .catch(console.error)
