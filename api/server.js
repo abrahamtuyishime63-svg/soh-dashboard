@@ -27,7 +27,7 @@ const GPS_IOT_POLL_INTERVAL = parseInt(process.env.GPSIOT_POLL_INTERVAL || '5000
 const GPS_IOT_ENABLED = true;
 
 let gpsIoTMonitor = null;  // Active monitor instance
-let DEMO_MODE = !GPS_IOT_API_KEY || !GPS_IOT_API_SECRET;  // Auto-enable demo when no credentials
+let DEMO_MODE = true;  // Default to demo mode for testing
 
 // Demo data generator for testing without real GPS IoT credentials
 const DEMO_ASSETS = [
