@@ -27,7 +27,7 @@ const GPS_IOT_POLL_INTERVAL = parseInt(process.env.GPSIOT_POLL_INTERVAL || '5000
 const GPS_IOT_ENABLED = true;
 
 let gpsIoTMonitor = null;  // Active monitor instance
-let DEMO_MODE = false;  // Disabled by default - enable with credentials
+let DEMO_MODE = !GPS_IOT_API_KEY || !GPS_IOT_API_SECRET;  // Auto-enable demo when no credentials
 
 // Demo data generator for testing without real GPS IoT credentials
 const DEMO_ASSETS = [
@@ -201,6 +201,16 @@ function normalizeCloudPayload(body, rowIndex = 0) {
 // GET /api/predictions — Get SoH predictions from all GPS IoT assets
 app.get('/api/predictions', async (req, res) => {
   try {
+    // Return demo data if demo mode is active
+    if (DEMO_MODE) {
+      return res.json({
+        ok: true,
+        demoMode: true,
+        count: DEMO_ASSETS.length,
+        data: DEMO_ASSETS.map(asset => generatePredictionFromReading(generateDemoReading(asset.assetId), asset.assetId))
+      });
+    }
+
     if (!gpsIoTMonitor) {
       return res.status(503).json({
         ok: false,
@@ -245,6 +255,18 @@ app.get('/api/predictions', async (req, res) => {
 // GET /api/batteries — Returns GPS IoT monitored assets as "batteries"
 app.get('/api/batteries', (req, res) => {
   try {
+    // Return demo data if demo mode is active
+    if (DEMO_MODE) {
+      const batteries = DEMO_ASSETS.map(a => ({
+        id: a.assetId,
+        name: a.assetId,
+        client: 'Demo Fleet',
+        reseller: 'Demo Mode',
+        imei: '000-' + a.assetId
+      }));
+      return res.json({ ok: true, demoMode: true, batteries });
+    }
+
     if (!gpsIoTMonitor) {
       return res.status(503).json({
         ok: false,
