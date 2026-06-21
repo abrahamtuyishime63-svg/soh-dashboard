@@ -1,0 +1,29 @@
+{
+  "name": "soh-battery-dashboard",
+  "version": "1.0.0",
+  "description": "Battery State of Health Prediction Dashboard - 7 Model Engineering View",
+  "scripts": {
+    "start": "node api/server.js",
+    "dev": "concurrently \"node api/server.js\" \"npx vite --port 5173 --open\"",
+    "build": "npx vite build",
+    "preview": "npx vite preview"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "csv-parse": "^5.5.3",
+    "concurrently": "^8.2.2",
+    "dotenv": "^16.0.3",
+    "axios": "^1.6.0",
+    "mqtt": "^5.0.0",
+    "sqlite3": "^5.1.6",
+    "jsonwebtoken": "^9.0.0",
+    "express-rate-limit": "^7.0.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "@vitejs/plugin-react": "^4.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}
